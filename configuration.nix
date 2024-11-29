@@ -4,13 +4,17 @@
 
 { config, pkgs, lib, inputs, ... }:
 
+
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./nvidia.nix
       ./plasma.nix
-      ./hardware-acceleration.nix
+      #./hardware-acceleration.nix
+      #./modules/omen_14.nix
+      #./gnome.nix 
+
     ];
 
   # Bootloader.
@@ -22,29 +26,15 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot";
   # filesystems
-  fileSystems = {
-   "/mnt/HDD" = {
-    device = "/dev/disk/by-uuid/b16a1147-bc63-4967-90dc-795cc43acf7c";
-    fsType = "ext4";
-    options = [ "defaults" "rw" ];
-   };
-
-  "/mnt/SSD" = {
-    device = "/dev/mapper/ssd";
-    fsType = "ext4";
-    options = [ "defaults" "rw" ];
-   };
-  };
-
-  boot.initrd.luks.devices."ssd" = {
-   device = "/dev/disk/by-uuid/7db316c8-32ae-45e2-a15a-7a759ad2c263";
-   preLVM = true;
-  };
+#  services.xserver.enable = true;
+#  services.xserver.displayManager.gdm.enable = true;
+#  services.xserver.desktopManager.gnome.enable = true;
 
   # additional boot params for wayland
   boot.kernelParams = [ "nvidia-drm.modeset=1" ];
   boot.blacklistedKernelModules = [ "nouveau" ];
-
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -137,10 +127,34 @@
     ];
     shell = pkgs.fish;
   };
+  
+  # hyprland config
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
+  security.polkit.enable = true;
+
+  fonts.packages = with pkgs; [
+    noto-fonts
+    noto-fonts-cjk
+    noto-fonts-emoji
+    liberation_ttf
+    fira-code
+    fira-code-symbols
+    mplus-outline-fonts.githubRelease
+    dina-font
+    proggyfonts
+  ];
+  services.displayManager.sddm.wayland.enable = true;
+  
 
   # Install firefox.
   programs.firefox.enable = true;
-
+  services.xserver.enable = true;
+ # services.xserver.displayManager.enable = true;
+ # services.xserver.desktopManager.gnome.enable = true;
+  
   # Steam
   programs.steam = {
     enable = true;
@@ -150,9 +164,8 @@
     };
   
   programs.gamemode.enable = true; 
-  xdg.portal.enable = true;
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  
+#  xdg.portal.enable = true;
+#  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -185,6 +198,11 @@
    discord
    mesa-demos
    virtualbox
+   dconf
+   xdg-desktop-portal-hyprland
+   wofi
+   R
+   python3
    ];
 
     programs.fish = {
@@ -195,10 +213,10 @@
   # Version
   system.stateVersion = "24.11";
  # nixpkgs.config.allowUnfree = pkgs.lib.mkForce = true;
-  services.xserver.videoDrivers = lib.mkDefault ["nvidia"];
-  environment.sessionVariables = {
-    STEAM_EXTRA_COMPAT_TOOLS_PATHS = "/home/user/.steam/root/compatibilitytools.d";
-    };  
+ # services.xserver.videoDrivers = lib.mkDefault ["nvidia"];
+ # environment.sessionVariables = {
+  #  STEAM_EXTRA_COMPAT_TOOLS_PATHS = "/home/user/.steam/root/compatibilitytools.d";
+   # };  
   
   
   # Some programs need SUID wrappers, can be configured further or are
