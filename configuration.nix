@@ -6,13 +6,15 @@
 
 
 {
+  disabledModules = [ "virtualisation/virtualbox-host.nix" ];
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./nvidia.nix
       ./plasma.nix
-      #./hardware-acceleration.nix
-      #./modules/omen_14.nix
+      ./hardware-acceleration.nix
+       <nixos-hardware/omen/14-fb0798ng>
+      ./modules/virtualbox-host.nix
       #./gnome.nix 
 
     ];
@@ -25,28 +27,43 @@
   boot.loader.grub.efiSupport = true; 
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot";
-  # filesystems
+
+#  filesystems
 #  services.xserver.enable = true;
 #  services.xserver.displayManager.gdm.enable = true;
 #  services.xserver.desktopManager.gnome.enable = true;
 
   # additional boot params for wayland
-  boot.kernelParams = [ "nvidia-drm.modeset=1" ];
+  boot.kernelParams = [ "nvidia-drm.modeset=1" "snd_intel_dspcfg.dsp_driver=1" "snd_hda_intel.dmic_detect=0" ];
+
   boot.blacklistedKernelModules = [ "nouveau" ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
   
   networking.hostName = "nixos"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+ # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   
+ # networking.networkmanager.wifi = {
+ #  ssid = "eduroam";
+ #  mode = "client";
+ #  authentication = {
+ #   eap = "peap";
+ #   ca-cert = "/home/kb759/.config/cat_installer/ca.pem";
+ #   identity = "kb759+laptop2@cam.ac.uk";
+ #   anonymous-identity = "_token-public@cam.ac.uk";
+ #   password = "jpbs46bmt73xgyhr";
+ #   phase2-auth = "mschapv2";
+ #   };
+ # };
+  
   boot.initrd.kernelModules = 
   [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
   # Enable networking
   networking.networkmanager.enable = true;
-
+  
   # Set your time zone.
   time.timeZone = "Europe/London";
  
@@ -77,20 +94,24 @@
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
+  # intel CPU
+  hardware.cpu.intel.updateMicrocode = true;
+  
+
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
+  enable = true;
+  alsa.enable = true;
+  alsa.support32Bit = true;
+  pulse.enable = true;
+  # If you want to use JACK applications, uncomment this
+  jack.enable = true;
+  audio.enable = true;
+   # use the example session manager (no others are packaged yet so this is enabled by default,
+  # no need to redefine it in your config for now)
+  #services.pipewire.wireplumber = true;
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -120,7 +141,7 @@
   users.users.kb759 = {
     isNormalUser = true;
     description = "kb759";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "audio" "vboxusers" ];
     packages = with pkgs; [
       kdePackages.kate
       thunderbird
@@ -203,6 +224,21 @@
    wofi
    R
    python3
+   waybar
+   intel-ocl
+   pipewire
+   pavucontrol  # For GUI audio control
+   sof-firmware
+   alsa-ucm-conf
+   lshw
+   wireplumber
+   wpa_supplicant
+   networkmanager
+   dbus
+   rclone
+   joplin
+   joplin-desktop
+   libsForQt5.qtstyleplugin-kvantum
    ];
 
     programs.fish = {
@@ -228,8 +264,15 @@
   # };
 
   # List services that you want to enable:
-  virtualisation.virtualbox.host.enable = true;
+  #virtualisation.virtualbox.host.enableKvm = true;
+  users.groups.vboxusers = { };
   users.extraGroups.vboxusers.members = [ "kb759"];
+  #virtualisation.virtualbox.host.enableExtensionPack = true;
+  services.udev.extraRules = ''
+  SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", GROUP="vboxusers", MODE="0660"
+'';
+
+
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
