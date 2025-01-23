@@ -5,10 +5,10 @@
 
 
 # Enable OpenGL
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
+    #driSupport = true;
+    enable32Bit = true;
    };
    
 
@@ -39,16 +39,16 @@
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
 
-    prime = {
-    reverseSync.enable = true; 
-		# Make sure to use the correct Bus ID values for your system!
-     nvidiaBusId = "PCI:9:0:0";
-     intelBusId = "PCI:0:0:0";
-     offload.enableOffloadCmd = true;
+    #prime = {
+    #sync.enable = true; 
+		## Make sure to use the correct Bus ID values for your system!
+    # nvidiaBusId = "PCI:1:0:0";
+    # intelBusId = "PCI:0:2:0";
+     #offload.enableOffloadCmd = true;
      #amdgpuBusId = "";
-    };
+   # };
 
   };
 
