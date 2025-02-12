@@ -4,7 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ./nvidia.nix
-    ./plasma.nix
+#    ./plasma.nix
     ./hardware-acceleration.nix
   ];
 
@@ -68,7 +68,7 @@
   console.keyMap = "uk";
 
   # PipeWire (instead of PulseAudio)
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -109,6 +109,9 @@
     ];
     shell = pkgs.fish;
   };
+
+programs.fuse.userAllowOther = true;
+
 
   # Hyprland + XWayland
   programs.hyprland = {
@@ -207,6 +210,8 @@
     htop
     libreoffice-qt6-fresh
     sshfs
+    yazi
+    macchina
   ];
 
   # Fish shell
