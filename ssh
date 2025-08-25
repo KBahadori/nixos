@@ -1,0 +1,23 @@
+Host *
+ ControlMaster auto
+ ControlPath ~/.ssh/ssh_mux_%h_%p_%r
+ ControlPersist 10m
+ ServerAliveInterval 30
+ ServerAliveCountMax 600
+
+Host login-node
+ HostName login-icelake.hpc.cam.ac.uk
+ User kb759
+ Port 22
+
+Host login-cpu-node
+ HostName login-cpu.hpc.cam.ac.uk
+ User kb759
+ Port 22
+
+Host hpc-compute
+ HostName cpu-r-34
+ User kb759
+ Port 22
+ ProxyJump login-node
+
